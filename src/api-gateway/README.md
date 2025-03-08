@@ -1,3 +1,5 @@
 # api-gateway Service
 
-This is the **API Gateway** service. It manages authentication, request routing, and rate-limiting. It is implemented using **Kong**.
+API Gateway using Node.js and Express. This microservice routes requests to the appropriate backend services and ensures secure communication. 
+
+# Can consider AWS AZURE Gateways (for Now this is the BFF)

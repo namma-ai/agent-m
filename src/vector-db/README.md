@@ -1,3 +1,3 @@
 # vector-db Service
 
-This is the **Vector Database Service**, used to store and retrieve AI embeddings for retrieval-augmented generation (RAG). Uses **pgvector** or **Pinecone**.
+Vector Database using PGVector. Used for AI embeddings and vector search operations.

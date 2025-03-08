@@ -1,93 +1,133 @@
-version: '3.8'
 services:
  frontend:
    build: ./frontend
+   container_name: agentic-frontend
    ports:
      - "3000:3000"
-   environment:
-     - REACT_APP_API_URL=http://localhost:8000
    depends_on:
      - api-gateway
+   networks:
+     - agentic-network
  api-gateway:
-   image: kong
+   build: ./api-gateway
+   container_name: agentic-api-gateway
    ports:
      - "8000:8000"
-     - "8443:8443"
-   environment:
-     - KONG_DATABASE=off
    depends_on:
-     - ai-orchestrator
- ai-orchestrator:
-   build: ./ai-orchestrator
+     - workflow-orchestrator
+   networks:
+     - agentic-network
+ workflow-orchestrator:
+   build: ./workflow-orchestrator
+   container_name: agentic-workflow
    ports:
-     - "8001:8001"
-   environment:
-     - LLM_API_URL=http://llm-interaction:8002
+     - "5001:5000"
    depends_on:
-     - task-queue
-     - llm-interaction
- llm-interaction:
-   build: ./llm-interaction
-   environment:
-     - OPENAI_API_KEY=\
-   depends_on:
-     - vector-db
- task-queue:
-   image: redis
-   command: ["redis-server", "--appendonly", "yes"]
-   ports:
-     - "6379:6379"
- execution-api:
-   build: ./execution-api
-   ports:
-     - "8003:8003"
-   depends_on:
-     - task-queue
- data-storage:
-   image: postgres:latest
-   restart: always
-   ports:
-     - "5432:5432"
-   environment:
-     - POSTGRES_USER=\
-     - POSTGRES_PASSWORD=\
-     - POSTGRES_DB=\
-   volumes:
-     - pgdata:/var/lib/postgresql/data
- vector-db:
-   image: ankane/pgvector
-   restart: always
-   ports:
-     - "5433:5432"
-   environment:
-     - POSTGRES_USER=\
-     - POSTGRES_PASSWORD=\
-     - POSTGRES_DB=\
-   volumes:
-     - vectordata:/var/lib/postgresql/data
- web-sockets:
-   build: ./web-sockets
-   ports:
-     - "8004:8004"
+     - temporal
+   networks:
+     - agentic-network
  logging:
-   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
-   environment:
-     - discovery.type=single-node
+   build: ./logging
+   container_name: agentic-logging
    ports:
+     - "5601:5601"
      - "9200:9200"
- auth-service:
-   build: ./auth-service
+   networks:
+     - agentic-network
+ websocket-service:
+   build: ./websocket-service
+   container_name: agentic-websocket
    ports:
-     - "8005:8005"
+     - "5007:5000"
+   networks:
+     - agentic-network
+ ai-processor:
+   build: ./ai-processor
+   container_name: agentic-ai-processor
+   ports:
+     - "5002:5000"
+   networks:
+     - agentic-network
+ ai-action-service:
+   build: ./ai-action-service
+   container_name: agentic-ai-action-service
+   ports:
+     - "5022:5000"
+   networks:
+     - agentic-network  
+ ai-prompt-service:
+   build: ./ai-prompt-service
+   container_name: agentic-ai-prompt-service
+   ports:
+     - "5032:5000"
+   networks:
+     - agentic-network  
+ data-preprocessing:
+   build: ./data-preprocessing
+   container_name: agentic-data-preprocessor
+   ports:
+     - "5003:5000"
+   networks:
+     - agentic-network
+ event-bus:
+   build: ./event-bus
+   container_name: agentic-event-bus
+   ports:
+     - "5006:5000"
+   networks:
+     - agentic-network
  storage:
    image: minio/minio
-   command: server /data
+   container_name: agentic-storage
    ports:
      - "9000:9000"
      - "9001:9001"
+   command: server /data --console-address ":9001"
+   networks:
+     - agentic-network
+ task-queue:
+   build: ./task-queue
+   container_name: agentic-task-queue
+   depends_on:
+     - redis
+   networks:
+     - agentic-network
+ redis:
+   image: redis:alpine
+   container_name: agentic-redis
+   ports:
+     - "6379:6379"
+   networks:
+     - agentic-network
+ database:
+   image: postgres:15
+   container_name: agentic-db
    environment:
-     - MINIO_ROOT_USER=\
-     - MINIO_ROOT_PASSWORD=\
-volumes:
- pgdata:
- vectordata:
+     POSTGRES_DB: agentic_db
+     POSTGRES_USER: admin
+     POSTGRES_PASSWORD: admin
+   ports:
+     - "5432:5432"
+   networks:
+     - agentic-network
+ vector-db:
+   image: ankane/pgvector
+   container_name: agentic-vector-db
+   environment:
+     POSTGRES_DB: vector_db
+     POSTGRES_USER: admin
+     POSTGRES_PASSWORD: admin
+   ports:
+     - "5433:5432"
+   networks:
+     - agentic-network
+ temporal:
+   image: temporalio/auto-setup:latest
+   container_name: temporal-server
+   ports:
+     - "7233:7233"
+   networks:
+     - agentic-network
+networks:
+ agentic-network:
+   driver: bridge

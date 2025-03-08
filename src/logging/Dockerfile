@@ -1,0 +1,2 @@
+FROM sebp/elk
+EXPOSE 5601 9200 5044

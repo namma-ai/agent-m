@@ -1,3 +1,3 @@
 # auth-service Service
 
-This is the **Authentication Service**, managing user authentication and access control using **OAuth2 / JWT**.
+Authentication Service using Python 3.13 and FastAPI. Implements JWT-based authentication and OAuth2 for secure access control.

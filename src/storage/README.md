@@ -1,3 +1,3 @@
 # storage Service
 
-This is the **Storage Service**, used for storing AI-generated files and reports. Uses **MinIO** (S3-compatible storage).
+Storage Service using MinIO. Provides S3-compatible object storage for storing AI models, logs, and processed data.
