@@ -1,0 +1,93 @@
+version: '3.8'
+services:
+ frontend:
+   build: ./frontend
+   ports:
+     - "3000:3000"
+   environment:
+     - REACT_APP_API_URL=http://localhost:8000
+   depends_on:
+     - api-gateway
+ api-gateway:
+   image: kong
+   ports:
+     - "8000:8000"
+     - "8443:8443"
+   environment:
+     - KONG_DATABASE=off
+   depends_on:
+     - ai-orchestrator
+ ai-orchestrator:
+   build: ./ai-orchestrator
+   ports:
+     - "8001:8001"
+   environment:
+     - LLM_API_URL=http://llm-interaction:8002
+   depends_on:
+     - task-queue
+     - llm-interaction
+ llm-interaction:
+   build: ./llm-interaction
+   environment:
+     - OPENAI_API_KEY=\
+   depends_on:
+     - vector-db
+ task-queue:
+   image: redis
+   command: ["redis-server", "--appendonly", "yes"]
+   ports:
+     - "6379:6379"
+ execution-api:
+   build: ./execution-api
+   ports:
+     - "8003:8003"
+   depends_on:
+     - task-queue
+ data-storage:
+   image: postgres:latest
+   restart: always
+   ports:
+     - "5432:5432"
+   environment:
+     - POSTGRES_USER=\
+     - POSTGRES_PASSWORD=\
+     - POSTGRES_DB=\
+   volumes:
+     - pgdata:/var/lib/postgresql/data
+ vector-db:
+   image: ankane/pgvector
+   restart: always
+   ports:
+     - "5433:5432"
+   environment:
+     - POSTGRES_USER=\
+     - POSTGRES_PASSWORD=\
+     - POSTGRES_DB=\
+   volumes:
+     - vectordata:/var/lib/postgresql/data
+ web-sockets:
+   build: ./web-sockets
+   ports:
+     - "8004:8004"
+ logging:
+   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+   environment:
+     - discovery.type=single-node
+   ports:
+     - "9200:9200"
+ auth-service:
+   build: ./auth-service
+   ports:
+     - "8005:8005"
+ storage:
+   image: minio/minio
+   command: server /data
+   ports:
+     - "9000:9000"
+     - "9001:9001"
+   environment:
+     - MINIO_ROOT_USER=\
+     - MINIO_ROOT_PASSWORD=\
+volumes:
+ pgdata:
+ vectordata:
