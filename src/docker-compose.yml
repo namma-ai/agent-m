@@ -4,16 +4,23 @@ services:
    build: ./frontend
    container_name: agentic-frontend
    ports:
-     - "3000:3000"
+     - "13001:3000"
    depends_on:
      - api-gateway
+   networks:
+     - agentic-network
+ auth-service:
+   build: ./auth-service
+   container_name: agentic-auth-service
+   ports:
+     - "13002:8001"
    networks:
      - agentic-network
  api-gateway:
    build: ./api-gateway
    container_name: agentic-api-gateway
    ports:
-     - "8000:3001"
+     - "13003:3001"
    depends_on:
      - workflow-orchestrator
    networks:
@@ -22,7 +29,7 @@ services:
    build: ./workflow-orchestrator
    container_name: agentic-workflow
    ports:
-     - "5001:5000"
+     - "13004:5000"
    depends_on:
      - temporal
    networks:
@@ -31,50 +38,50 @@ services:
    build: ./logging
    container_name: agentic-logging
    ports:
-     - "5601:5601"
-     - "9200:9200"
+     - "13006:5601"
+     - "13007:9200"
    networks:
      - agentic-network
  websocket-service:
    build: ./websocket-service
    container_name: agentic-websocket
    ports:
-     - "5007:5000"
+     - "13008:5000"
    networks:
      - agentic-network
  ai-processor:
    build: ./ai-processor
    container_name: agentic-ai-processor
    ports:
-     - "5002:5000"
+     - "13009:5000"
    networks:
      - agentic-network
  ai-action-service:
    build: ./ai-action-service
    container_name: agentic-ai-action-service
    ports:
-     - "5022:5000"
+     - "13010:5000"
    networks:
      - agentic-network  
  ai-prompt-service:
    build: ./ai-prompt-service
    container_name: agentic-ai-prompt-service
    ports:
-     - "5032:5000"
+     - "13011:5000"
    networks:
      - agentic-network  
  data-preprocessing:
    build: ./data-preprocessing
    container_name: agentic-data-preprocessor
    ports:
-     - "5003:5000"
+     - "13012:5000"
    networks:
      - agentic-network
  event-bus:
    build: ./event-bus
    container_name: agentic-event-bus
    ports:
-     - "5006:5000"
+     - "13013:5000"
    networks:
      - agentic-network
  storage:

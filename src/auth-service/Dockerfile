@@ -1,6 +1,6 @@
 FROM python:3.13
-WORKDIR /app
+WORKDIR /
 COPY . .
-RUN pip install fastapi grpcio grpcio-tools temporalio
-CMD ["python", "service.py"]
-EXPOSE 5000
+RUN pip install -r requirements.txt
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+EXPOSE 8001
