@@ -1,6 +1,13 @@
 FROM python:3.13
+
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests build-essential libpq-dev python3-dev && pip install --no-cache-dir --upgrade pip
+
 WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
+COPY ./requirements.txt /app
+
+RUN pip install --no-cache-dir --requirement /app/requirements.txt
+COPY . /app
+
 CMD ["python", "main.py"]
+
 EXPOSE 5000

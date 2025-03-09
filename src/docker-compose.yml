@@ -77,13 +77,6 @@ services:
      - "13012:5000"
    networks:
      - agentic-network
- event-bus:
-   build: ./event-bus
-   container_name: agentic-event-bus
-   ports:
-     - "13013:5000"
-   networks:
-     - agentic-network
  storage:
    image: minio/minio
    container_name: agentic-storage
@@ -100,29 +93,19 @@ services:
      - redis
    networks:
      - agentic-network
- kafka:
-   image: bitnami/kafka:latest
-   container_name: agentic-kafka
+ rabbitmq:
+   image: rabbitmq:3-management
+   container_name: rabbitmq
+   ports:
+     - '5672:5672'    # AMQP protocol port
+     - '15672:15672'  # Management UI port
    environment:
-     KAFKA_BROKER_ID: 1
-     KAFKA_LISTENERS: PLAINTEXT://:9092
-     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-   depends_on:
-     - zookeeper
+     RABBITMQ_DEFAULT_USER: guest
+     RABBITMQ_DEFAULT_PASS: guest
+   volumes:
+     - rabbitmq_data:/var/lib/rabbitmq
    networks:
      - agentic-network
-   ports:
-     - "9092:9092"
- zookeeper:
-   image: bitnami/zookeeper:latest
-   container_name: agentic-zookeeper
-   environment:
-     ALLOW_ANONYMOUS_LOGIN: "yes"
-   networks:
-     - agentic-network
-   ports:
-     - "2181:2181"
  redis:
    image: redis:alpine
    container_name: agentic-redis
@@ -162,3 +145,5 @@ services:
 networks:
  agentic-network:
    driver: bridge
+volumes:
+  rabbitmq_data:

@@ -1,6 +1,7 @@
 FROM node:22
-WORKDIR /
-COPY . .
+
+WORKDIR /app
+COPY . /app
 RUN npm install
 CMD ["node", "server.js"]
 EXPOSE 3001

@@ -1,6 +1,12 @@
 FROM python:3.13
-WORKDIR /
-COPY . .
-RUN pip install -r requirements.txt
+
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests build-essential libpq-dev python3-dev && pip install --no-cache-dir --upgrade pip
+
+WORKDIR /app
+COPY ./requirements.txt /app
+
+RUN pip install --no-cache-dir --requirement /app/requirements.txt
+COPY . /app
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
 EXPOSE 8001

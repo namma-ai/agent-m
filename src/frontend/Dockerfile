@@ -1,6 +1,6 @@
 FROM node:22
-WORKDIR /
-COPY . .
+WORKDIR /app
+COPY . /app
 RUN npm install
 CMD ["npm", "start"]
 EXPOSE 3000
