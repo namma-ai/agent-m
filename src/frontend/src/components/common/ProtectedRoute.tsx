@@ -1,0 +1,16 @@
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
+
+const ProtectedRoute: React.FC = () => {
+  const token = useAuthStore((state) => state.token);
+
+  if (!token) {
+    // Redirect to login if not authenticated
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
+};
+
+export default ProtectedRoute;
