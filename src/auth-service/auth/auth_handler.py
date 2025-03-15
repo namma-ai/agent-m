@@ -1,24 +1,34 @@
-from datetime import datetime, timedelta, timezone
-from typing import Union
-import jwt
+# from datetime import datetime, timedelta, timezone
+# from typing import Union
+# import jwt
 
-SECRET_KEY = "your_secret_key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# SECRET_KEY = "your_secret_key"
+# ALGORITHM = "HS256"
+# ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+# def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
+#     to_encode = data.copy()
+#     if expires_delta:
+#         expire = datetime.now(timezone.utc) + expires_delta
+#     else:
+#         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+#     to_encode.update({"exp": expire})
+#     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+#     return encoded_jwt
 
-def decode_access_token(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except jwt.PyJWTError:
-        return None
+# def decode_access_token(token: str):
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         return payload
+#     except jwt.PyJWTError:
+#         return None
+
+from keycloak import KeycloakOpenID
+import os # Import settings instance, not Settings class
+
+keycloak_openid = KeycloakOpenID(
+    server_url=os.getenv("KEYCLOAK_URL"),
+    realm_name=os.getenv("REALM_NAME"),
+    client_id=os.getenv("CLIENT_ID"),
+    client_secret_key=os.getenv("CLIENT_SECRET")
+)

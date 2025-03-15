@@ -1,25 +1,66 @@
-from fastapi import Request, HTTPException
+# from fastapi import Request, HTTPException
+# from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+# from auth.auth_handler import decode_access_token
+
+# class JWTBearer(HTTPBearer):
+#     def __init__(self, auto_error: bool = True):
+#         super(JWTBearer, self).__init__(auto_error=auto_error)
+
+#     async def __call__(self, request: Request):
+#         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+#         if credentials:
+#             if not credentials.scheme == "Bearer":
+#                 raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
+#             if not self.verify_jwt(credentials.credentials):
+#                 raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+#             return credentials.credentials
+#         else:
+#             raise HTTPException(status_code=403, detail="Invalid authorization code.")
+
+#     def verify_jwt(self, jwtoken: str) -> bool:
+#         isTokenValid: bool = False
+#         payload = decode_access_token(jwtoken)  
+#         if payload:
+#             isTokenValid = True
+#         return isTokenValid
+
+
+# auth/auth-bearer.py
+from fastapi import Request, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from auth.auth_handler import decode_access_token
+from .auth_handler import keycloak_openid  # Import the Keycloak client
 
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
-        super(JWTBearer, self).__init__(auto_error=auto_error)
+        super().__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request):
-        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
-        if credentials:
-            if not credentials.scheme == "Bearer":
-                raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
-            if not self.verify_jwt(credentials.credentials):
-                raise HTTPException(status_code=403, detail="Invalid token or expired token.")
-            return credentials.credentials
-        else:
-            raise HTTPException(status_code=403, detail="Invalid authorization code.")
+        credentials: HTTPAuthorizationCredentials = await super().__call__(request)
+        if not credentials:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid authorization code"
+            )
+        
+        if credentials.scheme != "Bearer":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid authentication scheme"
+            )
+        
+        
+        try:
+            decoded = keycloak_openid.decode_token(
+                credentials.credentials,
+                options={"verify_signature": True, "verify_aud": False}
+            )
+            request.state.token = decoded  # Store decoded token in request state
+            return decoded
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid token: {str(e)}"
+            )
 
-    def verify_jwt(self, jwtoken: str) -> bool:
-        isTokenValid: bool = False
-        payload = decode_access_token(jwtoken)
-        if payload:
-            isTokenValid = True
-        return isTokenValid
+# Create an instance to use as dependency
+security = JWTBearer()

@@ -2,3 +2,10 @@ fastapi
 uvicorn
 pyjwt
 python-multipart
+python-keycloak
+python-dotenv
+requests
+python-jose[cryptography]
+pydantic
+pydantic-settings
+python-multipart

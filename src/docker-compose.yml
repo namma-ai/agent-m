@@ -14,8 +14,15 @@ services:
    container_name: agentic-auth-service
    ports:
      - "13002:8001"
+   environment:
+    KEYCLOAK_URL: http://localhost:8080
+    REALM_NAME: myrealm
+    CLIENT_ID: auth-service
+    CLIENT_SECRET: dZrECoRlN2MlCdagmnuFgZxM3Q2L0qrh
+   depends_on: ["keycloak"]
    networks:
      - agentic-network
+
  api-gateway:
    build: ./api-gateway
    container_name: agentic-api-gateway
@@ -133,6 +140,32 @@ services:
      POSTGRES_PASSWORD: admin
    ports:
      - "5433:5432"
+   networks:
+     - agentic-network
+ keycloak:
+   image: quay.io/keycloak/keycloak:24.0  
+   container_name: agentic-keycloak
+   command: start-dev
+   environment:
+     KEYCLOAK_ADMIN: admin
+     KEYCLOAK_ADMIN_PASSWORD: admin
+     KC_HOSTNAME: localhost
+     KC_HOSTNAME_PORT: 8080
+     KC_FRONTEND_URL: http://localhost:8080
+     KC_HOSTNAME_STRICT: "false"
+     KC_HTTP_ENABLED: "true"
+     KC_HEALTH_ENABLED: "true"
+     KC_LOG_LEVEL: info
+     KC_PROXY_HEADERS: forwarded
+     KC_HOSTNAME_DEBUG: "true"
+   ports:
+     - "8080:8080"
+   healthcheck:
+     test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+     interval: 30s
+     timeout: 10s
+     retries: 3
+
    networks:
      - agentic-network
  temporal:

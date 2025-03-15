@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from routes import user,default
-
-
 app = FastAPI()
 
 app.include_router(default.router)
