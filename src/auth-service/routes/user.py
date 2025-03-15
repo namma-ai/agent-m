@@ -65,7 +65,7 @@ async def login(
     password: str = Form(...)
 ):
     """Authenticate with Keycloak and get JWT token"""
-    token_url = "http://localhost:8080/realms/devrealm/protocol/openid-connect/token"
+    token_url = f"{KEYCLOAK_URL}/realms/{REALM_NAME}/protocol/openid-connect/token"
     logging.info(f"username:{username} password:{password}")
     print(f"username:{username} password:{password}")   
     data = {

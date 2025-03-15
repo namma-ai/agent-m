@@ -15,10 +15,10 @@ services:
    ports:
      - "13002:8001"
    environment:
-    KEYCLOAK_URL: http://localhost:8080
-    REALM_NAME: myrealm
+    KEYCLOAK_URL: http://keycloak:8080
+    REALM_NAME: devrealm
     CLIENT_ID: auth-service
-    CLIENT_SECRET: dZrECoRlN2MlCdagmnuFgZxM3Q2L0qrh
+    CLIENT_SECRET: tL6eofTjou7G0HOsJevRRX5DS3qKtdOt
    depends_on: ["keycloak"]
    networks:
      - agentic-network
