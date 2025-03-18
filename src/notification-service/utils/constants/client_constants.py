@@ -1,0 +1,1 @@
+PIP_POINT_CLIENT = 'pinpoint'
